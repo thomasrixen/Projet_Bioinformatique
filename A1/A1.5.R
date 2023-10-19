@@ -1,4 +1,4 @@
-library(seqinr)
+library(ape)
 
 sequence_filename <- "bacterial_sequence.fasta"
 
@@ -43,7 +43,8 @@ find_frame_start <- function(sequence, frame_size = 3, increment, target_string)
 }
 
 #Exemple d'utilisation
-# test_sequence <- c("t", "t", "c", "t", "g", "t", "a", "c", "t", "g")
+
+test_sequence <- c("t", "t", "c", "t", "g", "t", "a", "c", "t", "g", "t", "t", "a", "g", "a", "t")
 # target_string <- "ctg"
 # frame_size <- 3
 # increment <- 1
@@ -69,10 +70,28 @@ get_codons_index <- function(sequence, codons){
     return(sort_list)
 }
 
-#Exemple d'utilisation
-
-# start_index <- find_frame_start(genome_sequence, frame_size, increment, target_string)
-# cat("Indexes of the start of the frame:", start_index, "\n")
+count_len <- function(start_indexes, stop_indexes, min_len, len_seq){
+    count <- 0
+    start_index <- 1
+    while(start_index < length(start_indexes)){
+        index <- start_indexes[start_index] + 3
+        while(!is.element(index, stop_indexes) && index <= len_seq-2){
+            index <- index + 3
+        }
+        if ((index + 3)-start_indexes[start_index] >= min_len) {
+           count <- count + 1
+        # uncomment if you want to have details about all the sequence   
+        #    cat("The codon nr :", count, "\n")
+        #    cat("start_index = ", start_indexes[start_index], "\n")
+        #    cat("end_index = ", index, "\n")
+        #    cat("longueur = ", (index + 3)-start_indexes[start_index], "\n")
+        }
+        while(start_indexes[start_index] < index + 3 && start_index <= length(start_indexes)){
+            start_index <- start_index + 1
+        }
+    }
+    return(count)
+}
 
 list_start <- get_codons_index(genome_sequence, start_codons)
 cat("Indexes of all the start codons:", list_start, "\n")
@@ -80,3 +99,15 @@ cat("Indexes of all the start codons:", list_start, "\n")
 list_stop <- get_codons_index(genome_sequence, stop_codons)
 cat("Indexes of all the stop codons:", list_stop, "\n")
 
+ORFs_result <- c(0, 0, 0, 0, 0, 0)
+labels <- c("0", "10", "50", "100", "300", "500")
+k_nuc = c(0, 10, 50, 100, 300, 500)
+names(ORFs_result) <- labels
+
+for (k in k_nuc) {
+   ORFs_result[as.character(k)] <- count_len(list_start, list_stop, k, length(genome_sequence))
+}
+
+ORFs_result
+
+saveRDS(ORFs_result, file = "ORFs_result.rds")
