@@ -1,4 +1,5 @@
 library(ape)
+
 #=================================================#
 #                   QUESTION 1                    #
 #=================================================#
@@ -32,25 +33,39 @@ saveRDS(dimer_matrix, "dimer_frequencies.rds")
 #=================================================#
 
 
-seq <- paste(seq, collapse = "")
 
-# Create the observed_dimer_frequencies matrix
 observed_dimer_frequencies <- matrix(0, nrow = 4, ncol = 4)
 rownames(observed_dimer_frequencies) <- c("A*", "C*", "G*", "T*")
 colnames(observed_dimer_frequencies) <- c("*A", "*C", "*G", "*T")
 
-# Function to count dimers in a DNA sequence
-count_dimer <- function(nuc1, nuc2, seq) {
-  dimers <- paste0(nuc1, nuc2)
-  count <- nchar(gsub(paste0("(?=", dimers, ")"), "", seq, perl = TRUE)) / 2
-  return(count)
+
+count_dimer <- function(nuc1, nuc2, seq){
+    index <- 1
+    count <- 0
+    len_seq <- length(seq)
+
+    while(index < len_seq){
+        if (index + 1 > len_seq) {
+           break
+        }
+        if (!is.na(seq[index]) && !is.na(seq[index + 1]) && seq[index] == nuc1 && seq[index + 1] == nuc2) {
+            count <- count + 1
+        }
+        index <- index + 1
+
+    }
+    count
 }
 
+
 for (colonne in colnames(observed_dimer_frequencies)) {
-  for (ligne in rownames(observed_dimer_frequencies)) {
-    observed_dimer_frequencies[ligne, colonne] = count_dimer(get_lower_letter(ligne), get_lower_letter(colonne), seq)
-  }
+    for (ligne in rownames(observed_dimer_frequencies)) {
+      observed_dimer_frequencies[ligne, colonne] = count_dimer(get_lower_letter(ligne), get_lower_letter(colonne), seq)/sequence_length
+      #print(observed_dimer_frequencies)
+    }
 }
+print(observed_dimer_frequencies)
+
 
 get_lower_letter <- function(input_string) {
   if (grepl("[A-Z]\\*", input_string)) {
@@ -64,22 +79,19 @@ get_lower_letter <- function(input_string) {
   }
 }
 
-# Print the observed dimer frequencies
-print("This is the observed dimer frequencies in the sequence:")
-print(observed_dimer_frequencies)
+print("This is the observed dimer frequencies in the sequence :")
+observed_dimer_frequencies
 
-# Function to get the top labels
 get_top_labels <- function(matrix, get_largest = TRUE) {
-  values <- as.vector(matrix[, -1])
-  labels <- matrix[, 1]
-  
+  values <- as.vector(matrix[ , -1])
+  labels <- matrix[ , 1]
+
   sorted_indices <- ifelse(get_largest, order(values, decreasing = TRUE), order(values))
-  
+
   top_indices <- sorted_indices[1:3]
   top_labels <- labels[top_indices]
-  
+
   return(top_labels)
 }
 
-# Save the observed dimer frequencies to an RDS file
 saveRDS(observed_dimer_frequencies, "observed_dimer_frequencies.rds")
