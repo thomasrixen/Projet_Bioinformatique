@@ -1,5 +1,7 @@
 # Load the 'ape' library for working with DNA sequences
 library(ape)
+library(Biostrings)
+library(seqinr) 
 
 # Specify the filename for the DNA sequence in FASTA format
 sequence_filename <- "bacterial_sequence.fasta"
@@ -7,7 +9,10 @@ sequence_filename <- "bacterial_sequence.fasta"
 # Read the DNA sequence from the file
 mat <- read.dna(sequence_filename, format = "fasta", as.character = TRUE)
 genome_sequence <- as.vector(mat)
-sequence_length <- length(sequence)  # Should be 'genome_sequence' instead of 'sequence'
+sequence_length <- length(genome_sequence)  # Should be 'genome_sequence' instead of 'sequence'
+
+backward_genome_sequence <- rev(comp(genome_sequence))
+
 
 # Define start and stop codons
 start_codons <- c("ttg", "ctg", "ata", "att", "atc", "atg", "gtg")
@@ -66,14 +71,13 @@ count_len <- function(start_indexes, stop_indexes, min_len, len_seq) {
     }
     return(count)
 }
-
 # Get the indexes of all start codons in the DNA sequence
-list_start <- get_codons_index(genome_sequence, start_codons)
-cat("Indexes of all the start codons:", list_start, "\n")
+forward_list_start <- get_codons_index(genome_sequence, start_codons)
+backward_list_start <- get_codons_index(backward_genome_sequence, start_codons)
 
 # Get the indexes of all stop codons in the DNA sequence
-list_stop <- get_codons_index(genome_sequence, stop_codons)
-cat("Indexes of all the stop codons:", list_stop, "\n")
+forward_list_stop <- get_codons_index(genome_sequence, stop_codons)
+backward_list_stop <- get_codons_index(backward_genome_sequence, stop_codons)
 
 # Initialize a vector to store the counts of ORFs of different lengths
 ORFs_result <- c(0, 0, 0, 0, 0, 0)
@@ -83,7 +87,7 @@ names(ORFs_result) <- labels
 
 # Count the number of ORFs of different lengths
 for (k in k_nuc) {
-    ORFs_result[as.character(k)] <- count_len(list_start, list_stop, k, length(genome_sequence))
+    ORFs_result[as.character(k)] <- count_len(forward_list_start, forward_list_stop, k, sequence_length) + count_len(backward_list_start, backward_list_stop, k, sequence_length)
 }
 
 # Display the results
