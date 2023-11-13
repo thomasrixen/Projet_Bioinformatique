@@ -19,30 +19,40 @@ alignment <- pairwiseAlignment(pattern=seq1, subject=seq2,
                                type="overlap")
 
 
+
 # Extract aligned sequences
 aligned_pattern <- as.character(alignedPattern(alignment))
 aligned_subject <- as.character(alignedSubject(alignment))
 
 # Initialize mismatch count
-mismatch_count <- 0
-gaps_count <- 0
 
-# Iterate through the aligned sequences and count mismatches
-for (i in 1:nchar(aligned_pattern)) {
-  if (substr(aligned_pattern, i, i) != substr(aligned_subject, i, i) &&
-      substr(aligned_pattern, i, i) != "-" &&
-      substr(aligned_subject, i, i) != "-") {
-    mismatch_count <- mismatch_count + 1
+
+
+get_mismatch <- function(aligned_pattern) {
+  mismatch_count <- 0
+  # Iterate through the aligned sequences and count mismatches
+  for (i in 1:nchar(aligned_pattern)) {
+    if (substr(aligned_pattern, i, i) != substr(aligned_subject, i, i) &&
+        substr(aligned_pattern, i, i) != "-" &&
+        substr(aligned_subject, i, i) != "-") {
+      mismatch_count <- mismatch_count + 1
+    }
   }
+  return(mismatch_count)
 }
 
-# Iterate through the aligned sequences and count mismatches
-for (i in 1:nchar(aligned_pattern)) {
-  if (substr(aligned_pattern, i, i) == "-" ||
-      substr(aligned_subject, i, i) == "-") {
-    gaps_count <- gaps_count + 1
+get_gaps <- function(aligned_pattern){
+  gaps_count <- 0
+  # Iterate through the aligned sequences and count mismatches
+  for (i in 1:nchar(aligned_pattern)) {
+    if (substr(aligned_pattern, i, i) == "-" ||
+        substr(aligned_subject, i, i) == "-") {
+      gaps_count <- gaps_count + 1
+    }
   }
+  return(gaps_count)
 }
+
 
 alignment_score <- score(alignment)
 alignment_match <- nmatch(alignment)
