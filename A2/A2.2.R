@@ -28,34 +28,36 @@ aligned_subject <- as.character(alignedSubject(alignment))
 
 
 
-get_mismatch <- function(aligned_pattern) {
+get_mismatch <- function(pattern, subject) {
   mismatch_count <- 0
   # Iterate through the aligned sequences and count mismatches
-  for (i in 1:nchar(aligned_pattern)) {
-    if (substr(aligned_pattern, i, i) != substr(aligned_subject, i, i) &&
-        substr(aligned_pattern, i, i) != "-" &&
-        substr(aligned_subject, i, i) != "-") {
+  for (i in 1:nchar(pattern)) {
+    if (substr(pattern, i, i) != substr(subject, i, i) &&
+        substr(pattern, i, i) != "-" &&
+        substr(subject, i, i) != "-") {
       mismatch_count <- mismatch_count + 1
     }
   }
   return(mismatch_count)
 }
 
-get_gaps <- function(aligned_pattern){
+get_gaps <- function(pattern, subject){
   gaps_count <- 0
   # Iterate through the aligned sequences and count mismatches
-  for (i in 1:nchar(aligned_pattern)) {
-    if (substr(aligned_pattern, i, i) == "-" ||
-        substr(aligned_subject, i, i) == "-") {
+  for (i in 1:nchar(pattern)) {
+    if (substr(pattern, i, i) == "-" ||
+        substr(subject, i, i) == "-") {
       gaps_count <- gaps_count + 1
     }
   }
   return(gaps_count)
 }
 
-
 alignment_score <- score(alignment)
 alignment_match <- nmatch(alignment)
+mismatch_count <- get_mismatch(aligned_pattern, aligned_subject)
+gaps_count <- get_gaps(aligned_pattern, aligned_subject)
+
 # Output the mismatch count
 cat("Number of Score:", alignment_score, "\n")
 cat("Number of Match:", alignment_match, "\n")
